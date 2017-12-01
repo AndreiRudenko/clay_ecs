@@ -1,0 +1,10 @@
+{
+	"name": "clay",
+	"url": "https://github.com/RudenkoArts/clay",
+	"license": "MIT",
+	"tags": ["entity","component","system","ecs","cross","clay"],
+	"description": "ecs",
+	"version": "0.0.1",
+	"releasenote": "",
+	"contributors": ["RudenkoArts"]
+}

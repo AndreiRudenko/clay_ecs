@@ -1,0 +1,10 @@
+## CPP
+-main TestAll
+-lib utest
+-cp src
+-debug
+
+-cp test
+-cpp build/test
+
+
