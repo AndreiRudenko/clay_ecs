@@ -59,12 +59,9 @@ class EntityManager {
 		_entities._add(id);
 
 		if(_components != null) {
-			var cm = world.components;
-			for (c in _components) {
-				cm.set(e, c);
-			}
+			world.components.set_many(e, _components);
 		}
-
+		
 		world.changed();
 
 		return e;

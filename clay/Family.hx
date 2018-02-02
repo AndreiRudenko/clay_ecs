@@ -11,9 +11,11 @@ import clay.signals.Signal;
 
 @:final @:unreflective @:dce
 class Family {
+	
 
 	public var name(default, null):String;
 	public var inited(default, null):Bool = false;
+	public var length(get, never):Int;
 
 	public var onadded:Signal<Entity->Void>;
 	public var onremoved:Signal<Entity->Void>;
@@ -23,50 +25,28 @@ class Family {
 	var _components:ComponentManager;
 	var _include_types:Array<ComponentType>;
 	var _exclude_types:Array<ComponentType>;
+	
 
-	var _init_vars:InitVars;
-
-
-	public function new(_name:String, ?_include:Array<Class<Dynamic>>, ?_exclude:Array<Class<Dynamic>>) {
+	public function new(world:World, _name:String, ?_include:Array<Class<Dynamic>>, ?_exclude:Array<Class<Dynamic>>) {
 
 		name = _name;
-		
+
+		_world = world;
+		_components = _world.components;
+		_entities = new EntityVector(_world.entities.capacity);
+
 		onadded = new Signal();
 		onremoved = new Signal();
 
 		_include_types = [];
 		_exclude_types = [];
 
-		if(_include != null || _exclude != null) {
-			_init_vars = {
-				include : _include,
-				exclude : _exclude
-			};
+		if(_include != null) {
+			include(_include);
 		}
 
-	}
-
-	public function init(_w:World) {
-
-		if(!inited) {
-			_world = _w;
-			_components = _world.components;
-			_entities = new EntityVector(_world.entities.capacity);
-
-			if(_init_vars != null) {
-				var _include = _init_vars.include;
-				if(_include != null) {
-					include(_include);
-				}
-				var _exclude = _init_vars.exclude;
-				if(_exclude != null) {
-					exclude(_exclude);
-				}
-				_init_vars = null;
-			}
-
-		} else {
-			throw('Family already inited');
+		if(_exclude != null) {
+			exclude(_exclude);
 		}
 
 	}
@@ -115,7 +95,11 @@ class Family {
 
 	function component_added(e:Entity, ct:ComponentType) {
 
-		if(!_has(e) && _match_entity(e)) {
+		if(_has(e)) {
+			if(_match_exclude(ct)) {
+				_remove(e);
+			}
+		} else if(_match_entity(e)) {
 			_add(e);
 		}
 		
@@ -153,7 +137,7 @@ class Family {
 
 	@:access(clay.core.ComponentManager)
 	inline function _match_entity(e:Entity):Bool {
-		
+
 		var _match:Bool = true;
 
 		for (ct in _exclude_types) {
@@ -198,6 +182,27 @@ class Family {
 
 	}
 
+	function _match_exclude(ct:ComponentType):Bool {
+
+		var _match:Bool = false;
+
+		for (it in _exclude_types) {
+			if(it == ct) {
+				_match = true;
+				break;
+			}
+		}
+
+		return _match;
+
+	}
+
+	inline function get_length():Int {
+
+		return _entities.length;
+		
+	}
+
 	@:noCompletion public function toString() {
 
 		var _list = []; 
@@ -216,13 +221,5 @@ class Family {
 
 	}
 
-
-}
-
-
-private typedef InitVars = {
-
-	var include : Array<Class<Dynamic>>;
-	var exclude : Array<Class<Dynamic>>;
 
 }

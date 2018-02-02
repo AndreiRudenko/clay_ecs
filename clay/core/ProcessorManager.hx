@@ -1,5 +1,6 @@
 package clay.core;
 
+
 import clay.utils.Log.*;
 
 import clay.containers.ProcessorList;
@@ -40,6 +41,14 @@ class ProcessorManager {
 
 		for (p in _processors) {
 			p.init();
+		}
+		
+	}
+
+	public function update(dt:Float) {
+		
+		for (p in active_processors) {
+			p.update(dt);
 		}
 		
 	}

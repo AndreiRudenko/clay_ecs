@@ -10,6 +10,8 @@ import clay.types.ComponentType;
 import clay.Components;
 
 
+@:access(clay.core.FamilyManager)
+@:access(clay.Family)
 class ComponentManager {
 
 
@@ -53,6 +55,20 @@ class ComponentManager {
 		var ct:ComponentType = get_type(_component_class);
 		return cast components[ct.id].set(_entity, _component);
 
+	}
+
+		/** add a array of components to the entity.
+			@param _entity The entity.
+			@param _components Array of components to add. */
+	public inline function set_many(_entity:Entity, _components:Array<Dynamic>) {
+
+		var ct:ComponentType = new ComponentType(-1);
+		for (c in _components) {
+			ct = get_type(Type.getClass(c));
+			components[ct.id].set(_entity, c, false); // don't notify families
+		}
+		// now we can check, and send events
+		world.families.check(_entity);
 	}
 
 		/** get a component from the entity.
@@ -115,7 +131,7 @@ class ComponentManager {
 
 	}
 
-		/** remove all _components from the entity */
+		/** remove all components from the entity */
 	public function remove_all(_entity:Entity) {
 
 		for (c in components) {
@@ -149,7 +165,7 @@ class ComponentManager {
 		} else {
 			ct = new ComponentType(id++);
 			types.set(tname, ct);
-			components[ct.id] = new Components<T>(this, ct, world.entities.capacity);
+			components[ct.id] = new Components<T>(world, ct);
 		}
 
 		return ct;
@@ -160,30 +176,6 @@ class ComponentManager {
 
 		return components[cid].has(e);
 		
-	}
-
-	@:access(clay.core.FamilyManager)
-	@:access(clay.Family)
-	function _onadded(e:Entity, ct:ComponentType) {
-
-		var _families = world.families.families;
-		for (f in _families) {
-			f.component_added(e, ct);
-		}
-		world.changed();
-		
-	}
-
-	@:access(clay.core.FamilyManager)
-	@:access(clay.Family)
-	function _onremoved(e:Entity, ct:ComponentType) {
-		
-		var _families = world.families.families;
-		for (f in _families) {
-			f.component_removed(e, ct);
-		}
-		world.changed();
-
 	}
 
 	@:noCompletion public function toString() {

@@ -27,7 +27,6 @@ class EntityVector {
 			indexes[i] = -1;
 		}
 
-
 	}
 
 	public inline function add(e:Entity) {

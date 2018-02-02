@@ -70,7 +70,10 @@ class Int32RingBuffer {
 		_head = 0;
 		_tail = 0;
 		_buffer = new IntArray(_mask + 1);
-
+		for (i in 0..._buffer.length) {
+			_buffer[i] = i;
+		}
+		
 	}
 
 	inline function get_length() {

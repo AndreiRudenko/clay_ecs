@@ -8,11 +8,11 @@ class Engine {
 	public var worlds:clay.core.WorldManager;
 
 
-    public function new(?_options:clay.World.WorldOptions) {
+    public function new(_capacity:Int = 16384) {
 
 		worlds = new clay.core.WorldManager();
 
-		world = new clay.World(_options);
+		world = new clay.World("world", _capacity);
 		worlds.add(world);
 
 	}

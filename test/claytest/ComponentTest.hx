@@ -23,12 +23,7 @@ class ComponentTest {
 
 	public function setup() {
 		
-		world = new World({
-			name : 'world',
-			processors : [],
-			capacity : 16384
-		});
-
+		world = new World('world', 16384);
 		cm = world.components;
 
 	}
@@ -41,9 +36,7 @@ class ComponentTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		cm.set(e, c1);
-		cm.set(e, c2);
-		cm.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		Assert.isTrue(cm.has(e, MockComponent)); 
 		Assert.isTrue(cm.has(e, MockComponent2)); 
@@ -59,9 +52,7 @@ class ComponentTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		cm.set(e, c1);
-		cm.set(e, c2);
-		cm.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		cm.remove(e, MockComponent);
 		cm.remove(e, MockComponent2);
@@ -81,9 +72,7 @@ class ComponentTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		cm.set(e, c1);
-		cm.set(e, c2);
-		cm.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		// cm.remove(e, MockComponent);
 		cm.remove(e, MockComponent2);
@@ -103,9 +92,7 @@ class ComponentTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		cm.set(e, c1);
-		cm.set(e, c2);
-		cm.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		cm.remove_all(e);
 
@@ -123,9 +110,7 @@ class ComponentTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		cm.set(e, c1);
-		cm.set(e, c2);
-		cm.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		var _c1 = cm.get(e, MockComponent);
 		var _c2 = cm.get(e, MockComponent2);
@@ -149,9 +134,7 @@ class ComponentTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		cm.set(e, c1);
-		cm.set(e, c2);
-		cm.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		var _c1 = mc.get(e);
 		var _c2 = mc2.get(e);

@@ -7,6 +7,7 @@ import clay.utils.Log.*;
 
 class Processor {
 
+
 	public var name(default, null):String;
 	public var priority (default, set) : Int = 0;
 	public var active (get, set) : Bool;
@@ -16,6 +17,7 @@ class Processor {
 
 	@:noCompletion public var prev : Processor;
 	@:noCompletion public var next : Processor;
+	
 
 	public function new() {
 

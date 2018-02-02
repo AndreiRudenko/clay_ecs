@@ -17,26 +17,23 @@ class FamilyTest {
 
 
 	var world:World;
+	var cm:ComponentManager;
 
 	public function new() {}
 
 	public function setup() {
 		
-		world = new World({
-			name : 'world',
-			processors : [],
-			families : [
-				new Family('family_a', [MockComponent]),
-				new Family('family_b', [MockComponent2, MockComponentExtended])
-			],
-			capacity : 16
-		});
+		world = new World('world', 16);
+		world.families.create('family_a', [MockComponent]);
+		world.families.create('family_b', [MockComponent2, MockComponentExtended]);
+		world.families.create('family_d', [MockComponent, MockComponent2], [MockComponentExtended]);
+		cm = world.components;
 
 	}
 
 	public function test_add_family():Void {
 
-		world.families.add(new Family('family_c', [MockComponent, MockComponent2]));
+		world.families.create('family_c', [MockComponent, MockComponent2]);
 		var fc = world.families.get('family_c');
 
 		Assert.isTrue(fc != null); 
@@ -84,9 +81,7 @@ class FamilyTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		world.components.set(e, c1);
-		world.components.set(e, c2);
-		world.components.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		for (ent in fa) {
 			var _c1 = mc.get(ent);
@@ -119,9 +114,7 @@ class FamilyTest {
 		var c2 = new MockComponent2();
 		var c3 = new MockComponentExtended();
 
-		world.components.set(e, c1);
-		world.components.set(e, c2);
-		world.components.set(e, c3);
+		cm.set_many(e, [c1, c2, c3]);
 
 		Assert.isTrue(fa.has(e)); 
 		Assert.isTrue(fb.has(e)); 
@@ -130,6 +123,36 @@ class FamilyTest {
 
 		Assert.isFalse(fa.has(e)); 
 		Assert.isTrue(fb.has(e)); 
+
+	}
+
+	public function test_exclude_components_family():Void {
+
+		var mc:Components<MockComponent> = world.components.get_table(MockComponent);
+		var mc2:Components<MockComponent2> = world.components.get_table(MockComponent2);
+		var mc3:Components<MockComponentExtended> = world.components.get_table(MockComponentExtended);
+
+		var fd = world.families.get('family_d');
+
+		var e = world.entities.create();
+
+		var c1 = new MockComponent(123);
+		var c2 = new MockComponent2();
+		var c3 = new MockComponentExtended();
+
+		cm.set_many(e, [c1, c2, c3]);
+
+		var e2 = world.entities.create();
+
+		var c1 = new MockComponent(456);
+		var c2 = new MockComponent2();
+
+		cm.set_many(e2, [c1, c2]);
+
+		trace(fd);
+
+		Assert.isTrue(fd.has(e2)); 
+		Assert.isFalse(fd.has(e)); 
 
 	}
 

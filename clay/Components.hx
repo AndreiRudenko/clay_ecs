@@ -9,30 +9,32 @@ import haxe.ds.Vector;
 
 
 @:access(clay.core.ComponentManager)
+@:access(clay.core.FamilyManager)
 class Components<T> {
 
 
-	var type: ComponentType;
-	var manager: ComponentManager;
-	var components: Vector<T>;
+	var world:World;
+	var type:ComponentType;
+	var components:Vector<T>;
 
 
-	public function new(_manager:ComponentManager, _ctype:ComponentType, _capacity:Int) {
+	public function new(_world:World, _ctype:ComponentType) {
 
 		type = _ctype;
-		manager = _manager;
-		components = new Vector(_capacity);
+		world = _world;
+		components = new Vector(world.entities.capacity);
 
 	}
 
-	public function set(e:Entity, c:T):T {
+	public function set(e:Entity, c:T, notify:Bool = true):T {
 
-		if(has(e)) {
-			remove(e);
-		}
+		remove(e);
 
 		components[e.id] = c;
-		manager._onadded(e, type);
+
+		if(notify) {
+			world.families.component_added(e, type);
+		}
 
 		return c;
 
@@ -47,7 +49,7 @@ class Components<T> {
 	public inline function copy(from:Entity, to:Entity) {
 
 		components[to.id] = components[from.id];
-		manager._onadded(to, type);
+		world.families.component_added(to, type);
 
 	}
 
@@ -62,7 +64,7 @@ class Components<T> {
 		var _has:Bool = has(e);
 
 		if(_has) {
-			manager._onremoved(e, type);
+			world.families.component_removed(e, type);
 			components[e.id] = null;
 		}
 
@@ -75,7 +77,7 @@ class Components<T> {
 		
 		for (i in 0...components.length) {
 			if(components[i] != null) {
-				manager._onremoved(new Entity(i), type);
+				world.families.component_removed(new Entity(i), type);
 				components[i] = null;
 			}
 		}
@@ -83,17 +85,17 @@ class Components<T> {
 	}
 
 	@:noCompletion public function toString() {
-
+		var cm = world.components;
 		var cname:String = '';
-		for (k in manager.types.keys()) {
-			var ct = manager.types.get(k);
+		for (k in cm.types.keys()) {
+			var ct = cm.types.get(k);
 			if(ct.id == type.id) {
 				cname = k;
 				break;
 			}
 		}
 
-		var entslen:Int = manager.world.entities.capacity;
+		var entslen:Int = world.entities.capacity;
 		var comps:Int = 0;
 
 		var arr = [];

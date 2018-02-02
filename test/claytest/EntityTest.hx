@@ -16,12 +16,7 @@ class EntityTest {
 
 	public function setup() {
 
-		world = new World({
-			name : 'world',
-			processors : [],
-			families : [],
-			capacity : 32
-		});
+		world = new World('world', 32);
 
 	}
 

@@ -9,6 +9,7 @@ import clay.core.ProcessorManager;
 import clay.core.FamilyManager;
 import clay.Components;
 import clay.Family;
+import clay.signals.Signal;
 import clay.utils.Log.*;
 
 
@@ -23,37 +24,45 @@ class World {
 	public var families   	(default, null): FamilyManager;
 	public var processors 	(default, null): ProcessorManager;
 
+	public var oninit   	(default, null):Signal<World->Void>;
+	public var ondestroy	(default, null):Signal<World->Void>;
+	public var onchanged	(default, null):Signal<World->Void>;
+
 	@:noCompletion public var _has_changed : Bool = false;
 
 
-	public function new(?_options:WorldOptions) {
+	public function new(_name:String = 'default_world', _capacity:Int = 16384) {
 
-		var _capacity:Int = def(_options.capacity, 16384);
-		name = def(_options.name, 'default_world');
+		name = _name;
+
+		if((_capacity & (_capacity - 1)) != 0) {
+			throw('World capacity: $_capacity must be power of two');
+		}
+
+		oninit = new Signal();
+		onchanged = new Signal();
+		ondestroy = new Signal();
 
 		entities = new EntityManager(this, _capacity);
 		components = new ComponentManager(this);
-		families = new FamilyManager(this, _options.families);
-		processors = new ProcessorManager(this, _options.processors);
-
-		init();
-
-		#if luxe
-			if(Luxe.core.debug != null) {
-				var _view:clay.debug.WorldDebugView = Luxe.core.debug.get_view('Clay World');
-				if(_view != null) {
-					_view.add_world(this);
-				}
-			}
-		#end
+		families = new FamilyManager(this);
+		processors = new ProcessorManager(this);
 		
 	}
 
-	function init() {
+	public function init() {
 
-		families.init();
 		processors.init();
 		inited = true;
+		oninit.emit(this);
+		
+	}
+
+	public function update(dt:Float) {
+
+		if(inited) {
+			processors.update(dt);
+		}
 		
 	}
 
@@ -61,16 +70,13 @@ class World {
 
 		_debug('destroy world: "${name}"');
 
-		#if luxe
-			if(Luxe.core.debug != null) {
-				var _view:clay.debug.WorldDebugView = Luxe.core.debug.get_view('Clay World');
-				if(_view != null) {
-					_view.remove_world(this);
-				}
-			}
-		#end
-
+		ondestroy.emit(this);
+		
 		empty();
+
+		oninit = null;
+		onchanged = null;
+		ondestroy = null;
 
 		entities = null;
 		components = null;
@@ -92,18 +98,8 @@ class World {
 	public inline function changed() {
 
 		_has_changed = true;	
+		onchanged.emit(this);
 		
 	}
-
-}
-
-
-
-typedef WorldOptions = {
-
-	@:optional var name : String;
-	@:optional var capacity : Int;
-	@:optional var families : Array<Family>;
-	@:optional var processors : Array<Processor>;
 
 }
