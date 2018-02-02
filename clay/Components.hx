@@ -29,7 +29,7 @@ class Components<T> {
 		remove(e);
 
 		components[e.id] = c;
-		manager.flags[e.id].set_true(type.id);
+		manager.flags[e.id].set_true(type.id + 1);
 
 		if(notify) {
 			manager.entity_changed(e);
@@ -49,7 +49,7 @@ class Components<T> {
 
 		var c = components[from.id];
 		components[to.id] = c;
-		manager.flags[to.id].set_true(type.id);
+		manager.flags[to.id].set_true(type.id + 1);
 		manager.entity_changed(to);
 
 	}
@@ -65,7 +65,7 @@ class Components<T> {
 		var _has:Bool = has(e);
 		
 		if(_has) {
-			manager.flags[e.id].set_false(type.id);
+			manager.flags[e.id].set_false(type.id + 1);
 			manager.entity_changed(e);
 			components[e.id] = null;
 		}
@@ -81,7 +81,7 @@ class Components<T> {
 			if(components[i] != null) {
 				manager.entity_changed(new Entity(i));
 				components[i] = null;
-				manager.flags[i].set_false(type.id);
+				manager.flags[i].set_false(type.id + 1);
 			}
 		}
 

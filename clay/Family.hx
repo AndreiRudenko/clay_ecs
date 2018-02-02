@@ -58,7 +58,7 @@ class Family {
 		var ct:ComponentType;
 		for (c in _comps) {
 			ct = _components.get_type(c);
-			_include_flags.set_true(ct.id);
+			_include_flags.set_true(ct.id + 1);
 		}
 
         return this;
@@ -70,7 +70,7 @@ class Family {
 		var ct:ComponentType;
 		for (c in _comps) {
 			ct = _components.get_type(c);
-			_exclude_flags.set_false(ct.id);
+			_exclude_flags.set_false(ct.id + 1);
 		}
 
         return this;
