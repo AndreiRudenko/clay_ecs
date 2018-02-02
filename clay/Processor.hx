@@ -1,7 +1,10 @@
 package clay;
 
 
-import clay.World;
+import clay.core.ComponentManager;
+import clay.core.EntityManager;
+import clay.core.FamilyManager;
+import clay.core.ProcessorManager;
 import clay.utils.Log.*;
 
 
@@ -13,7 +16,10 @@ class Processor {
 	public var active (get, set) : Bool;
 	var _active : Bool = false;
 
-	var world:World;
+	var components:ComponentManager;
+	var entities:EntityManager;
+	var families:FamilyManager;
+	var processors:ProcessorManager;
 
 	@:noCompletion public var prev : Processor;
 	@:noCompletion public var next : Processor;
@@ -33,8 +39,8 @@ class Processor {
 
 		_active = false;
 
-		if(world != null) {
-			world.processors.remove(Type.getClass(this));
+		if(processors != null) {
+			processors.remove(Type.getClass(this));
 		}
 
 	}
@@ -55,9 +61,9 @@ class Processor {
 
         onprioritychanged(priority);
 
-        if(world != null) {
-            world.processors.active_processors.remove( this );
-            world.processors.active_processors.add( this );
+        if(processors != null) {
+            processors.active_processors.remove( this );
+            processors.active_processors.add( this );
         }
 
         return priority;
@@ -74,11 +80,11 @@ class Processor {
 
 		_active = value;
 
-		if(world != null) {
+		if(processors != null) {
 			if(_active){
-				world.processors.enable(Type.getClass(this));
+				processors.enable(Type.getClass(this));
 			} else {
-				world.processors.disable(Type.getClass(this));
+				processors.disable(Type.getClass(this));
 			}
 		}
 		

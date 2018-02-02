@@ -3,9 +3,12 @@ package clay.core;
 
 import clay.utils.Log.*;
 
+import clay.core.ComponentManager;
+import clay.core.EntityManager;
+import clay.core.FamilyManager;
+
 import clay.containers.ProcessorList;
 import clay.ds.ClassMap;
-import clay.World;
 
 @:access(clay.Processor)
 class ProcessorManager {
@@ -16,24 +19,23 @@ class ProcessorManager {
 		/** The ordered list of active processors */
 	public var active_processors: ProcessorList;
 	
-	var world:World;
+	var entities:EntityManager;
+	var components:ComponentManager;
+	var families:FamilyManager;
 
 	var processors_count:Int = 0;
 	var active_count:Int = 0;
+	var inited:Bool = false;
 
 
-	public function new(_world:World, ?_procs:Array<Processor>) {
+	public function new(_entities:EntityManager, _components:ComponentManager, _families:FamilyManager) {
 
-		world = _world;
+		entities = _entities;
+		components = _components;
+		families = _families;
 
 		_processors = new ClassMap();
 		active_processors = new ProcessorList();
-
-		if(_procs != null) {
-			for (i in 0..._procs.length) {
-				add(_procs[i], i);
-			}
-		}
 
 	}
 
@@ -42,6 +44,7 @@ class ProcessorManager {
 		for (p in _processors) {
 			p.init();
 		}
+		inited = true;
 		
 	}
 
@@ -71,35 +74,29 @@ class ProcessorManager {
 
 		var _processor_class = Type.getClass(_processor);
 		
-			// set priority
 		_processor.priority = priority;
 
 			//store it in the processor list
 		_processors.set( _processor_class, _processor );
 		processors_count++;
-			//store reference of the owner
-		_processor.world = world;
 
-			//let them know
+		_processor.entities = entities;
+		_processor.components = components;
+		_processor.families = families;
+		_processor.processors = this;
+
 		_processor.onadded();
 
-			//if this processor is added
-			//after init has happened,
-			//it should init immediately
-		if(world.inited) {
-				// init families etc
+		if(inited) {
 			_processor.init();
 		}
 
-			// enable processor
 		if(_enable) {
 			enable(_processor_class);
 		}
 
 			//debug stuff
 		_debug('processors / adding a processor called ' + Type.getClass(_processor) + ', now at ' + Lambda.count(_processors) + ' processors');
-
-		world.changed();
 
 		return _processor;
 		
@@ -121,15 +118,16 @@ class ProcessorManager {
 					//tell user
 				_processor.onremoved();
 
-				_processor.world = null;
+				_processor.entities = null;
+				_processor.components = null;
+				_processor.families = null;
+				_processor.processors = null;
 
 					//remove it
 				_processors.remove(_processor_class);
 				processors_count--;
 
 			} //processor != null
-			
-			world.changed();
 
 			return _processor;
 
@@ -206,13 +204,4 @@ class ProcessorManager {
 
 	}
 
-}
-
-@:noCompletion
-@:allow(clay.core.ProcessorManager)
-class Tag {
-	static var processors_update           = 'clay.processors.update';
-	static var processors_render           = 'clay.processors.render';
-	static var processors_prerender        = 'clay.processors.prerender';
-	static var processors_postrender       = 'clay.processors.postrender';
 }

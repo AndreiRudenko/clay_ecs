@@ -9,20 +9,22 @@ import clay.utils.Log.*;
 
 import clay.Entity;
 import clay.Family;
-import clay.World;
 import clay.types.ComponentType;
+import clay.core.ComponentManager;
 
 @:access(clay.Family)
+@:access(clay.core.ComponentManager)
 class FamilyManager {
 
 
-	var world:World;
+	var components:ComponentManager;
 	var families:Map<String, Family>; // array?
 
 
-	public function new(_world:World) {
+	public function new(_components:ComponentManager) {
 		
-		world = _world;
+		components = _components;
+		components._entity_changed = check;
 
 		families = new Map();
 
@@ -30,21 +32,17 @@ class FamilyManager {
 
 	public function create(_name:String, ?_include:Array<Class<Dynamic>>, ?_exclude:Array<Class<Dynamic>>){
 
-		var _family = new Family(world, _name, _include, _exclude);
+		var _family = new Family(this, _name, _include, _exclude);
 
 		handle_duplicate_warning(_family.name);
 
 		families.set(_family.name, _family);
-
-		world.changed();
 
 	}
 
 	public function remove(_family:Family) {
 
 		families.remove(_family.name);
-
-		world.changed();
 		
 	}
 
@@ -62,42 +60,21 @@ class FamilyManager {
 		for (f in families) {
 			families.remove(f.name);
 		}
-		
-		world.changed();
 
 	}
 
 	@:noCompletion public function destroy_manager() {
 
-		world = null;
+		components = null;
 		families = null;
 
 	}
 
-	inline function component_added(e:Entity, ct:ComponentType) {
-		
-		for (f in families) {
-			f.component_added(e, ct);
-		}
-		world.changed();
-
-	}
-
-	inline function component_removed(e:Entity, ct:ComponentType) {
-		
-		for (f in families) {
-			f.component_removed(e, ct);
-		}
-		world.changed();
-
-	}
-
-	inline function check(e:Entity) {
+	function check(e:Entity) {
 		
 		for (f in families) {
 			f.check(e);
 		}
-		world.changed();
 
 	}
 	

@@ -4,68 +4,68 @@ package claytest;
 import utest.Assert;
 
 import clay.Entity;
-import clay.World;
+import clay.core.EntityManager;
 
 
 class EntityTest {
 
 
-	var world:World;
+	var entities:EntityManager;
 
 	public function new():Void {}
 
 	public function setup() {
 
-		world = new World('world', 32);
+		entities = new EntityManager(32);
 
 	}
 
 	public function teardown() {
 		
-		world.destroy();
-		world = null;
+		entities.destroy_manager();
+		entities = null;
 
 	}
 
 	public function test_entity_create():Void {
 
-		var e = world.entities.create();
+		var e = entities.create();
 
-		Assert.isTrue(world.entities.has(e)); 
-		Assert.isTrue(world.entities.is_active(e)); 
+		Assert.isTrue(entities.has(e)); 
+		Assert.isTrue(entities.is_active(e)); 
 
 	}
 
 	public function test_entity_create_inactive():Void {
 
-		var e = world.entities.create(null, false);
+		var e = entities.create(false);
 
-		Assert.isTrue(world.entities.has(e)); 
-		Assert.isFalse(world.entities.is_active(e)); 
+		Assert.isTrue(entities.has(e)); 
+		Assert.isFalse(entities.is_active(e)); 
 
 	}
 
 	public function test_entity_destroy():Void {
 
-		var e = world.entities.create();
+		var e = entities.create();
 
-		world.entities.destroy(e);
+		entities.destroy(e);
 
-		Assert.isFalse(world.entities.has(e)); 
+		Assert.isFalse(entities.has(e)); 
 
 	}
 
 	public function test_entity_activate_deactivate():Void {
 
-		var e = world.entities.create();
+		var e = entities.create();
 
-		Assert.isTrue(world.entities.is_active(e)); 
+		Assert.isTrue(entities.is_active(e)); 
 
-		world.entities.deactivate(e);
-		Assert.isFalse(world.entities.is_active(e)); 
+		entities.deactivate(e);
+		Assert.isFalse(entities.is_active(e)); 
 
-		world.entities.activate(e);
-		Assert.isTrue(world.entities.is_active(e)); 
+		entities.activate(e);
+		Assert.isTrue(entities.is_active(e)); 
 
 	}
 

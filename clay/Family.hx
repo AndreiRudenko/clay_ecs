@@ -1,45 +1,47 @@
 package clay;
 
 
-import clay.World;
 import clay.Entity;
 import clay.core.ComponentManager;
+import clay.core.FamilyManager;
 import clay.containers.EntityVector;
 import clay.types.ComponentType;
 import clay.signals.Signal;
+import clay.ds.BitFlag;
 
 
 @:final @:unreflective @:dce
+@:access(clay.core.FamilyManager)
+@:access(clay.core.ComponentManager)
 class Family {
 	
 
-	public var name(default, null):String;
-	public var inited(default, null):Bool = false;
-	public var length(get, never):Int;
+	public var name         (default, null):String;
+	public var inited       (default, null):Bool = false;
+	public var length       (get, never):Int;
 
-	public var onadded:Signal<Entity->Void>;
-	public var onremoved:Signal<Entity->Void>;
+	public var onadded  	(default, null):Signal<Entity->Void>;
+	public var onremoved	(default, null):Signal<Entity->Void>;
 
-	var _world:World;
 	var _entities:EntityVector;
 	var _components:ComponentManager;
-	var _include_types:Array<ComponentType>;
-	var _exclude_types:Array<ComponentType>;
+	var _include_flags:BitFlag;
+	var _exclude_flags:BitFlag;
 	
 
-	public function new(world:World, _name:String, ?_include:Array<Class<Dynamic>>, ?_exclude:Array<Class<Dynamic>>) {
+	public function new(manager:FamilyManager, _name:String, ?_include:Array<Class<Dynamic>>, ?_exclude:Array<Class<Dynamic>>) {
 
 		name = _name;
 
-		_world = world;
-		_components = _world.components;
-		_entities = new EntityVector(_world.entities.capacity);
+		_components = manager.components;
+		_entities = new EntityVector(_components.entities.capacity);
 
 		onadded = new Signal();
 		onremoved = new Signal();
 
-		_include_types = [];
-		_exclude_types = [];
+		_include_flags = new BitFlag();
+		_exclude_flags = new BitFlag();
+		_exclude_flags.flip();
 
 		if(_include != null) {
 			include(_include);
@@ -56,7 +58,7 @@ class Family {
 		var ct:ComponentType;
 		for (c in _comps) {
 			ct = _components.get_type(c);
-			_include_types.push(ct);
+			_include_flags.set_true(ct.id);
 		}
 
         return this;
@@ -68,7 +70,7 @@ class Family {
 		var ct:ComponentType;
 		for (c in _comps) {
 			ct = _components.get_type(c);
-			_exclude_types.push(ct);
+			_exclude_flags.set_false(ct.id);
 		}
 
         return this;
@@ -90,26 +92,6 @@ class Family {
 	public function has(e:Entity):Bool {
 		
 		return _has(e);
-
-	}
-
-	function component_added(e:Entity, ct:ComponentType) {
-
-		if(_has(e)) {
-			if(_match_exclude(ct)) {
-				_remove(e);
-			}
-		} else if(_match_entity(e)) {
-			_add(e);
-		}
-		
-	}
-
-	function component_removed(e:Entity, ct:ComponentType) {
-
-		if(_has(e) && _match_include(ct)) {
-			_remove(e);
-		}
 
 	}
 
@@ -138,62 +120,8 @@ class Family {
 	@:access(clay.core.ComponentManager)
 	inline function _match_entity(e:Entity):Bool {
 
-		var _match:Bool = true;
-
-		for (ct in _exclude_types) {
-			if(_match_component(e, ct)) {
-				_match = false;
-				break;
-			}
-		}
-
-		if(_match) {
-			for (ct in _include_types) {
-				if(!_match_component(e, ct)) {
-					_match = false;
-					break;
-				}
-			}
-		}
-
-		return _match;
-
-	}
-
-	@:access(clay.core.ComponentManager)
-	inline function _match_component(e:Entity, ct:ComponentType):Bool {
-		
-		return _components._has(e, ct.id);
-
-	}
-
-	function _match_include(ct:ComponentType):Bool {
-
-		var _match:Bool = false;
-
-		for (it in _include_types) {
-			if(it == ct) {
-				_match = true;
-				break;
-			}
-		}
-
-		return _match;
-
-	}
-
-	function _match_exclude(ct:ComponentType):Bool {
-
-		var _match:Bool = false;
-
-		for (it in _exclude_types) {
-			if(it == ct) {
-				_match = true;
-				break;
-			}
-		}
-
-		return _match;
+		var _flags = _components.flags[e.id];
+		return _flags.contains(_include_flags) && _exclude_flags.contains(_flags);
 
 	}
 

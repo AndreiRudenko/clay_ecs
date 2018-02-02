@@ -8,7 +8,6 @@ import clay.containers.EntityVector;
 import clay.utils.Log.*;
 
 import clay.Entity;
-import clay.World;
 
 class EntityManager {
 
@@ -17,7 +16,9 @@ class EntityManager {
 	public var used (default, null): Int;
 	public var available(get, never):Int;
 
-	var world:World;
+	var oncreate:Entity->Void;
+	var ondestroy:Entity->Void;
+	var onchanged:Entity->Void;
 
 	var _id_pool : Int32RingBuffer;
 	
@@ -26,11 +27,13 @@ class EntityManager {
 	var _entities : EntityVector;
 
 
-	public function new(_world:World, _capacity:Int) {
+	public function new(_capacity:Int) {
 
 		_debug('create new EntityManager');
 
-		world = _world;
+		if((_capacity & (_capacity - 1)) != 0) {
+			throw('EntityManager capacity: $_capacity must be power of two');
+		}
 
 		capacity = _capacity;
 		used = 0;
@@ -45,24 +48,22 @@ class EntityManager {
 	}
 
 	@:access(clay.containers.EntityVector)
-	public function create(?_components:Array<Dynamic>, ?_active:Bool) : Entity {
+	public function create(_active:Bool = true) : Entity {
 
 		var id:Int = pop_entity_id();
 		var e:Entity = new Entity(id); 
 
 		_alive_mask.enable(id);
 
-		if(_active != false) {
+		if(_active) {
 			_active_mask.enable(id);
 		}
 
 		_entities._add(id);
 
-		if(_components != null) {
-			world.components.set_many(e, _components);
+		if(oncreate != null) {
+			oncreate(e);
 		}
-		
-		world.changed();
 
 		return e;
 
@@ -75,18 +76,16 @@ class EntityManager {
 
 		assert(has(e), 'entity $id destroying repeatedly ');
 
-		// remove components here
-		world.components.remove_all(e);
-
 		_alive_mask.disable(id);
 		_active_mask.disable(id);
 
 		_entities._remove(id);
-
 		push_entity_id(id);
 
-		world.changed();
-		
+		if(ondestroy != null) { // is there right place?
+			ondestroy(e);
+		}
+
 	}
 
 	public inline function has(e:Entity):Bool {
@@ -118,7 +117,9 @@ class EntityManager {
 
 		_active_mask.enable(e.id);
 
-		world.changed();
+		if(onchanged != null) {
+			onchanged(e);
+		}
 
 	}
 
@@ -128,7 +129,9 @@ class EntityManager {
 
 		_active_mask.disable(e.id);
 
-		world.changed();
+		if(onchanged != null) {
+			onchanged(e);
+		}
 
 	}
 
@@ -158,8 +161,6 @@ class EntityManager {
 		_alive_mask.clear();
 		_active_mask.clear();
 		_id_pool.clear();
-		
-		world.changed();
 
 	}
 

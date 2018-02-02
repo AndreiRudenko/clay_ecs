@@ -1,8 +1,4 @@
-# Clay
-Entity-Component-System in haxe.
-
-##### Usage
-```haxe
+package ;
 
 import clay.Entity;
 import clay.Components;
@@ -114,9 +110,3 @@ class Main {
 	}
 
 }
-
-
-```
-
-##### License
-MIT

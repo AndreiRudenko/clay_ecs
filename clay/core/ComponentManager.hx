@@ -1,37 +1,49 @@
 package clay.core;
 
+import haxe.ds.Vector;
+
 import clay.utils.Log.*;
 
 import clay.Entity;
-import clay.World;
 import clay.core.FamilyManager;
+import clay.core.EntityManager;
 import clay.Family;
 import clay.types.ComponentType;
+import clay.ds.BitFlag;
 import clay.Components;
 
 
+@:access(clay.core.EntityManager)
 @:access(clay.core.FamilyManager)
+@:access(clay.Components)
 @:access(clay.Family)
 class ComponentManager {
 
 
-	var world:World;
 	var components:Array<Components<Dynamic>>;
+	var entities:EntityManager;
+	var flags:Vector<BitFlag>;
 	var types:Map<String, ComponentType>;
 	var id:Int = 0;
 
+	var _entity_changed:Entity->Void;
 
-	public function new(_world:World) {
+	public function new(_entities:EntityManager) {
 
 		_debug('create new ComponentManager');
 
-		world = _world;
+		entities = _entities;
+		entities.oncreate = onentitiycreate;
+		entities.ondestroy = onentitiydestroy;
+
+		flags = new Vector(_entities.capacity);
 
 		components = [];
 		types = new Map();
 
 	}
 
+	// need to find better name for this function
 	public function get_table<T>(_component_class:Class<T>):Components<T> {
 		
 		var ct:ComponentType = get_type(_component_class);
@@ -67,8 +79,9 @@ class ComponentManager {
 			ct = get_type(Type.getClass(c));
 			components[ct.id].set(_entity, c, false); // don't notify families
 		}
-		// now we can check, and send events
-		world.families.check(_entity);
+		// now we can send events
+		entity_changed(_entity);
+
 	}
 
 		/** get a component from the entity.
@@ -165,11 +178,32 @@ class ComponentManager {
 		} else {
 			ct = new ComponentType(id++);
 			types.set(tname, ct);
-			components[ct.id] = new Components<T>(world, ct);
+			components[ct.id] = new Components<T>(this, ct);
 		}
 
 		return ct;
 		
+	}
+
+	function onentitiycreate(e:Entity) {
+
+		flags[e.id] = new BitFlag();
+
+	}
+
+	function onentitiydestroy(e:Entity) {
+
+		remove_all(e);
+		flags[e.id] = null;
+
+	}
+
+	inline function entity_changed(e:Entity):Void {
+		
+		if(_entity_changed != null) {
+			_entity_changed(e);
+		}
+
 	}
 
 	inline function _has(e:Entity, cid:Int):Bool {

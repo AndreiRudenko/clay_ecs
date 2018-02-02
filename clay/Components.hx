@@ -1,7 +1,6 @@
 package clay;
 
 
-import clay.World;
 import clay.Entity;
 import clay.core.ComponentManager;
 import clay.types.ComponentType;
@@ -9,20 +8,19 @@ import haxe.ds.Vector;
 
 
 @:access(clay.core.ComponentManager)
-@:access(clay.core.FamilyManager)
 class Components<T> {
 
 
-	var world:World;
+	var manager:ComponentManager;
 	var type:ComponentType;
 	var components:Vector<T>;
 
 
-	public function new(_world:World, _ctype:ComponentType) {
+	public function new(_manager:ComponentManager, _ctype:ComponentType) {
 
 		type = _ctype;
-		world = _world;
-		components = new Vector(world.entities.capacity);
+		manager = _manager;
+		components = new Vector(manager.entities.capacity);
 
 	}
 
@@ -31,9 +29,10 @@ class Components<T> {
 		remove(e);
 
 		components[e.id] = c;
+		manager.flags[e.id].set_true(type.id);
 
 		if(notify) {
-			world.families.component_added(e, type);
+			manager.entity_changed(e);
 		}
 
 		return c;
@@ -48,8 +47,10 @@ class Components<T> {
 
 	public inline function copy(from:Entity, to:Entity) {
 
-		components[to.id] = components[from.id];
-		world.families.component_added(to, type);
+		var c = components[from.id];
+		components[to.id] = c;
+		manager.flags[to.id].set_true(type.id);
+		manager.entity_changed(to);
 
 	}
 
@@ -62,9 +63,10 @@ class Components<T> {
 	public function remove(e:Entity):Bool {
 
 		var _has:Bool = has(e);
-
+		
 		if(_has) {
-			world.families.component_removed(e, type);
+			manager.flags[e.id].set_false(type.id);
+			manager.entity_changed(e);
 			components[e.id] = null;
 		}
 
@@ -77,25 +79,25 @@ class Components<T> {
 		
 		for (i in 0...components.length) {
 			if(components[i] != null) {
-				world.families.component_removed(new Entity(i), type);
+				manager.entity_changed(new Entity(i));
 				components[i] = null;
+				manager.flags[i].set_false(type.id);
 			}
 		}
 
 	}
 
 	@:noCompletion public function toString() {
-		var cm = world.components;
 		var cname:String = '';
-		for (k in cm.types.keys()) {
-			var ct = cm.types.get(k);
+		for (k in manager.types.keys()) {
+			var ct = manager.types.get(k);
 			if(ct.id == type.id) {
 				cname = k;
 				break;
 			}
 		}
 
-		var entslen:Int = world.entities.capacity;
+		var entslen:Int = manager.entities.capacity;
 		var comps:Int = 0;
 
 		var arr = [];

@@ -1,0 +1,5 @@
+-main Main.hx
+-cp ../
+-debug
+
+-cpp build

@@ -4,7 +4,7 @@
 -cp src
 -debug
 
--cp test
--cpp build/test
+-cp ../
+-cpp build
 
 
