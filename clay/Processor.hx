@@ -63,9 +63,8 @@ class Processor {
 		onprioritychanged(priority);
 
 		if(processors != null && active) {
-			var c = Type.getClass(this);
-			processors._remove_active(c);
-			processors._add_active(c);
+			processors._remove_active(this);
+			processors._add_active(this);
 		}
 
 		return priority;
