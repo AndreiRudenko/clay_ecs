@@ -129,21 +129,7 @@ class ProcessorManager {
 			_debug('processors / enabling a processor ' + _class_name );
 			_processor.onenabled();
 			_processor._active = true;
-
-			var added:Bool = false;
-			var ap:Processor = null;
-			for (i in 0...active_processors.length) {
-				ap = active_processors[i];
-				if (_processor.priority <= ap.priority) {
-					active_processors.insert(i, _processor);
-					added = true;
-					break;
-				}
-			}
-			if(!added) {
-				active_processors.push(_processor);
-			}
-
+			_add_active(_processor);
 			_debug('processors / now at ${active_processors.length} active processors');
 		}
 
@@ -156,11 +142,35 @@ class ProcessorManager {
 		if(_processor != null && _processor.active) {
 			_debug('processors / disabling a processor ' + _class_name );
 			_processor.ondisabled();
+			_remove_active(_processor);
 			_processor._active = false;
-			active_processors.remove(_processor);
 			_debug('processors / now at ${active_processors.length} active processors');
 		}
 		
+	}
+
+	inline function _add_active(p:Processor) {
+		
+		var added:Bool = false;
+		var ap:Processor = null;
+		for (i in 0...active_processors.length) {
+			ap = active_processors[i];
+			if (_processor.priority <= ap.priority) {
+				active_processors.insert(i, _processor);
+				added = true;
+				break;
+			}
+		}
+		if(!added) {
+			active_processors.push(_processor);
+		}
+
+	}
+
+	inline function _remove_active(p:Processor) {
+
+		active_processors.remove(p);
+
 	}
 	
 		/** remove all processors from list */

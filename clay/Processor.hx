@@ -53,6 +53,7 @@ class Processor {
 	function onprioritychanged(value:Int) {}
 	function update(dt:Float) {}
 
+	@:access(clay.core.ProcessorManager)
 	inline function set_priority(value:Int) : Int {
 		
 		_debug('set priority on "${name}" to : ${value}');
@@ -61,10 +62,10 @@ class Processor {
 
 		onprioritychanged(priority);
 
-		if(processors != null) {
+		if(processors != null && active) {
 			var c = Type.getClass(this);
-			processors.disable(c);
-			processors.enable(c);
+			processors._remove_active(c);
+			processors._add_active(c);
 		}
 
 		return priority;
