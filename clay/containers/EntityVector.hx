@@ -43,7 +43,7 @@ class EntityVector {
 
 	}
 
-	public function has(e:Entity):Bool {
+	public inline function has(e:Entity):Bool {
 
 		return _has(e.id);
 

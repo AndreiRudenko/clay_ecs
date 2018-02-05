@@ -70,7 +70,7 @@ class FamilyManager {
 
 	}
 
-	function check(e:Entity) {
+	inline function check(e:Entity) {
 		
 		for (f in families) {
 			f.check(e);

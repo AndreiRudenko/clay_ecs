@@ -6,7 +6,7 @@ import clay.core.ComponentManager;
 import clay.core.FamilyManager;
 import clay.containers.EntityVector;
 import clay.types.ComponentType;
-import clay.signals.Signal;
+import clay.core.Signal;
 import clay.ds.BitFlag;
 
 

@@ -57,16 +57,17 @@ class Processor {
 		
 		_debug('set priority on "${name}" to : ${value}');
 
-        priority = value;
+		priority = value;
 
-        onprioritychanged(priority);
+		onprioritychanged(priority);
 
-        if(processors != null) {
-            processors.active_processors.remove( this );
-            processors.active_processors.add( this );
-        }
+		if(processors != null) {
+			var c = Type.getClass(this);
+			processors.disable(c);
+			processors.enable(c);
+		}
 
-        return priority;
+		return priority;
 
 	}
 

@@ -7,24 +7,19 @@ import clay.core.ComponentManager;
 import clay.core.EntityManager;
 import clay.core.FamilyManager;
 
-import clay.containers.ProcessorList;
-import clay.ds.ClassMap;
-
 @:access(clay.Processor)
 class ProcessorManager {
 
 
 		/** The list of processors */
-	@:noCompletion public var _processors:ClassMap<Class<Dynamic>, Processor>;
-		/** The ordered list of active processors */
-	public var active_processors: ProcessorList;
+	@:noCompletion public var _processors:Map<String, Processor>;
+		/** Array of active processors */
+	public var active_processors: Array<Processor>;
 	
 	var entities:EntityManager;
 	var components:ComponentManager;
 	var families:FamilyManager;
 
-	var processors_count:Int = 0;
-	var active_count:Int = 0;
 	var inited:Bool = false;
 
 
@@ -34,8 +29,8 @@ class ProcessorManager {
 		components = _components;
 		families = _families;
 
-		_processors = new ClassMap();
-		active_processors = new ProcessorList();
+		_processors = new Map();
+		active_processors = [];
 
 	}
 
@@ -58,14 +53,8 @@ class ProcessorManager {
 
 	public function destroy() {
 
-		if(processors_count > 0) {
-			var node = active_processors.head;
-			var _processor = null;
-			while(node != null) {
-				_processor = node;
-				node = node.next;
-				_processor.destroy();
-			}
+		for (p in _processors) {
+			p.destroy();
 		}
 
 	} //destroy
@@ -73,12 +62,11 @@ class ProcessorManager {
 	public function add<T:Processor>( _processor:T, priority:Int = 0, _enable:Bool = true ) : T {
 
 		var _processor_class = Type.getClass(_processor);
+		var _class_name = Type.getClassName(_processor_class);
 		
 		_processor.priority = priority;
 
-			//store it in the processor list
-		_processors.set( _processor_class, _processor );
-		processors_count++;
+		_processors.set( _class_name, _processor );
 
 		_processor.entities = entities;
 		_processor.components = components;
@@ -95,7 +83,6 @@ class ProcessorManager {
 			enable(_processor_class);
 		}
 
-			//debug stuff
 		_debug('processors / adding a processor called ' + Type.getClass(_processor) + ', now at ' + Lambda.count(_processors) + ' processors');
 
 		return _processor;
@@ -104,91 +91,88 @@ class ProcessorManager {
 
 	public function remove<T:Processor>( _processor_class:Class<T> ) : T {
 
-		if(_processors.exists(_processor_class)) {
+		var _class_name = Type.getClassName(_processor_class);
+		var _processor:T = cast _processors.get(_class_name);
 
-			var _processor:T = cast _processors.get(_processor_class);
+		if(_processor != null) {
 
-			if(_processor != null) {
+			if(_processor.active) {
+				disable(_processor_class);
+			}
 
-					//if it's running disable it
-				if(_processor.active) {
-					disable(_processor_class);
-				} //_processor.active
+			_processor.onremoved();
 
-					//tell user
-				_processor.onremoved();
+			_processor.entities = null;
+			_processor.components = null;
+			_processor.families = null;
+			_processor.processors = null;
 
-				_processor.entities = null;
-				_processor.components = null;
-				_processor.families = null;
-				_processor.processors = null;
+			_processors.remove(_class_name);
 
-					//remove it
-				_processors.remove(_processor_class);
-				processors_count--;
+		}
 
-			} //processor != null
+		return _processor;
 
-			return _processor;
-
-		} //remove
-
-		return null;
-
-	} //remove
+	}
 
 	public function get<T:Processor>( _processor_class:Class<T> ):T {
 		
-		return cast _processors.get( _processor_class );
+		return cast _processors.get( Type.getClassName(_processor_class) );
 
 	}
 
 	public function enable( _processor_class:Class<Dynamic> ) {
 		
-		if(processors_count == 0) {
-			return;
-		}
-
-		var _processor = _processors.get( _processor_class );
+		var _class_name = Type.getClassName(_processor_class);
+		var _processor = _processors.get( _class_name );
 		if(_processor != null && !_processor.active) {
-			_debug('processors / enabling a processor ' + _processor_class );
+			_debug('processors / enabling a processor ' + _class_name );
 			_processor.onenabled();
 			_processor._active = true;
-			active_processors.add(_processor);
-			active_count++;
+
+			var added:Bool = false;
+			var ap:Processor = null;
+			for (i in 0...active_processors.length) {
+				ap = active_processors[i];
+				if (_processor.priority <= ap.priority) {
+					active_processors.insert(i, _processor);
+					added = true;
+					break;
+				}
+			}
+			if(!added) {
+				active_processors.push(_processor);
+			}
+
 			_debug('processors / now at ${active_processors.length} active processors');
 		}
 
-	} //enable
+	}
 
 	public function disable( _processor_class:Class<Dynamic> ) {
 
-		if(processors_count == 0) {
-			return;
-		}
-
-		var _processor = _processors.get( _processor_class );
+		var _class_name = Type.getClassName(_processor_class);
+		var _processor = _processors.get( _class_name );
 		if(_processor != null && _processor.active) {
-			_debug('processors / disabling a processor ' + _processor_class );
+			_debug('processors / disabling a processor ' + _class_name );
 			_processor.ondisabled();
 			_processor._active = false;
 			active_processors.remove(_processor);
-			active_count--;
 			_debug('processors / now at ${active_processors.length} active processors');
 		}
 		
-	} //disable
+	}
 	
 		/** remove all processors from list */
 	public inline function clear() {
 
 		_debug('remove all processors');
 
-		for (p in _processors.keys()) {
-			disable(p);
+		for (p in _processors) {
+			disable(Type.getClass(p));
 		}
 
-		_processors = new ClassMap();
+		_processors = new Map();
 
 	}
 

@@ -4,10 +4,7 @@ import haxe.Int64;
 
 using haxe.Int64;
 
-/**
- * ...
- * @author PDeveloper
- */
+// https://github.com/PDeveloper/eskimo/blob/next/src/eskimo/bits/BitFlag.hx
 
 class BitFlag {
 	
@@ -93,7 +90,7 @@ class BitFlag {
 
 	}
 	
-	public inline function contains(flag:BitFlag):Bool {
+	public function contains(flag:BitFlag):Bool {
 
 		if (bits0 & flag.bits0 == flag.bits0 &&
 			bits1 & flag.bits1 == flag.bits1 &&

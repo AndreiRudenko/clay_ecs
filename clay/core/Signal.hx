@@ -1,4 +1,4 @@
-package clay.signals;
+package clay.core;
 
 // from Mint by Sven Bergström https://github.com/snowkit/mint
 // Contibuted by Michael Bickel http://github.com/dazKind
