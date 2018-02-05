@@ -2,8 +2,6 @@ package clay.core;
 
 import haxe.ds.Vector;
 
-import clay.utils.Log.*;
-
 import clay.Entity;
 import clay.core.FamilyManager;
 import clay.core.EntityManager;
@@ -28,9 +26,8 @@ class ComponentManager {
 
 	var _entity_changed:Entity->Void;
 
-	public function new(_entities:EntityManager) {
 
-		_debug('create new ComponentManager');
+	public function new(_entities:EntityManager) {
 
 		entities = _entities;
 		entities.oncreate = onentitiycreate;
@@ -156,15 +153,15 @@ class ComponentManager {
 		/** remove all components */
 	public function clear() {
 
-		_debug('destroy and remove all components');
+		for (e in entities) {
+			remove_all(e);
+		}
 
 	}
 
 		/** destroy ComponentManager */
 	@:noCompletion public function destroy_manager() {
 
-		_debug('destroy ComponentManager');
-		
 		clear();
 		
 	}

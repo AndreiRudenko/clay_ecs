@@ -5,7 +5,6 @@ import clay.core.ComponentManager;
 import clay.core.EntityManager;
 import clay.core.FamilyManager;
 import clay.core.ProcessorManager;
-import clay.utils.Log.*;
 
 
 class Processor {
@@ -20,22 +19,15 @@ class Processor {
 	var entities:EntityManager;
 	var families:FamilyManager;
 	var processors:ProcessorManager;
-
-	@:noCompletion public var prev : Processor;
-	@:noCompletion public var next : Processor;
 	
 
 	public function new() {
 
 		name = Type.getClassName(Type.getClass(this));
 
-		_debug('creating new processor: "${name}"');
-
 	}
 
 	public function destroy() {
-
-		_debug('destroy processor "${name}"');
 
 		_active = false;
 
@@ -55,8 +47,6 @@ class Processor {
 
 	@:access(clay.core.ProcessorManager)
 	inline function set_priority(value:Int) : Int {
-		
-		_debug('set priority on "${name}" to : ${value}');
 
 		priority = value;
 

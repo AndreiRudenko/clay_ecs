@@ -1,7 +1,5 @@
 package clay;
 
-import clay.utils.Log.*;
-
 
 @:dce @:final @:unreflective
 abstract Entity(Int) {

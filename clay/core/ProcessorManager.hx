@@ -1,8 +1,6 @@
 package clay.core;
 
 
-import clay.utils.Log.*;
-
 import clay.core.ComponentManager;
 import clay.core.EntityManager;
 import clay.core.FamilyManager;
@@ -83,8 +81,6 @@ class ProcessorManager {
 			enable(_processor_class);
 		}
 
-		_debug('processors / adding a processor called ' + Type.getClass(_processor) + ', now at ' + Lambda.count(_processors) + ' processors');
-
 		return _processor;
 		
 	} //add
@@ -126,11 +122,9 @@ class ProcessorManager {
 		var _class_name = Type.getClassName(_processor_class);
 		var _processor = _processors.get( _class_name );
 		if(_processor != null && !_processor.active) {
-			_debug('processors / enabling a processor ' + _class_name );
 			_processor.onenabled();
 			_processor._active = true;
 			_add_active(_processor);
-			_debug('processors / now at ${active_processors.length} active processors');
 		}
 
 	}
@@ -140,11 +134,9 @@ class ProcessorManager {
 		var _class_name = Type.getClassName(_processor_class);
 		var _processor = _processors.get( _class_name );
 		if(_processor != null && _processor.active) {
-			_debug('processors / disabling a processor ' + _class_name );
 			_processor.ondisabled();
 			_remove_active(_processor);
 			_processor._active = false;
-			_debug('processors / now at ${active_processors.length} active processors');
 		}
 		
 	}
@@ -175,8 +167,6 @@ class ProcessorManager {
 	
 		/** remove all processors from list */
 	public inline function clear() {
-
-		_debug('remove all processors');
 
 		for (p in _processors) {
 			disable(Type.getClass(p));

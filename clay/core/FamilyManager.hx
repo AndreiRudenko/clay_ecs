@@ -5,7 +5,6 @@ package clay.core;
 import clay.ds.Int32RingBuffer;
 import clay.ds.BitVector;
 import clay.containers.EntityVector;
-import clay.utils.Log.*;
 
 import clay.Entity;
 import clay.Family;
@@ -55,8 +54,6 @@ class FamilyManager {
 		/** remove all families */
 	public function clear() {
 
-		_debug('remove all families');
-
 		for (f in families) {
 			families.remove(f.name);
 		}
@@ -82,7 +79,7 @@ class FamilyManager {
 
 		var _f:Family = families.get(_name);
 		if(_f != null) {
-			log('adding a second family named: "${_name}"! This will replace the existing one, possibly leaving the previous one in limbo.');
+			trace('adding a second family named: "${_name}"! This will replace the existing one, possibly leaving the previous one in limbo.');
 			remove(_f);
 		}
 

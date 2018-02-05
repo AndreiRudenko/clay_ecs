@@ -5,7 +5,6 @@ package clay.core;
 import clay.ds.Int32RingBuffer;
 import clay.ds.BitVector;
 import clay.containers.EntityVector;
-import clay.utils.Log.*;
 
 import clay.Entity;
 
@@ -28,8 +27,6 @@ class EntityManager {
 
 
 	public function new(_capacity:Int) {
-
-		_debug('create new EntityManager');
 
 		if((_capacity & (_capacity - 1)) != 0) {
 			throw('EntityManager capacity: $_capacity must be power of two');
@@ -74,7 +71,9 @@ class EntityManager {
 
 		var id:Int = e.id;
 
-		assert(has(e), 'entity $id destroying repeatedly ');
+		if(!has(e)) {
+			throw('entity $id destroying repeatedly ');
+		}
 
 		_alive_mask.disable(id);
 		_active_mask.disable(id);
@@ -97,7 +96,9 @@ class EntityManager {
 	// check if it has id first
 	public inline function get(id:Int):Entity {
 
-		assert(_alive_mask.get(id), 'get / entity ${id} is not found');
+		if(!_alive_mask.get(id)) {
+			throw('get / entity ${id} is not found');
+		}
 
 		return new Entity(id);
 
@@ -105,7 +106,9 @@ class EntityManager {
 
 	public inline function is_active(e:Entity):Bool {
 
-		assert(has(e), 'is_active / entity ${e.id} is not found');
+		if(!has(e)) {
+			throw('is_active / entity ${e.id} is not found');
+		}
 
 		return _active_mask.get(e.id);
 		
@@ -113,7 +116,9 @@ class EntityManager {
 
 	public inline function activate(e:Entity) {
 
-		assert(has(e), 'activate / entity ${e.id} is not found');
+		if(!has(e)) {
+			throw('activate / entity ${e.id} is not found');
+		}
 
 		_active_mask.enable(e.id);
 
@@ -125,7 +130,9 @@ class EntityManager {
 
 	public inline function deactivate(e:Entity) {
 
-		assert(has(e), 'deactivate / entity ${e.id} is not found');
+		if(!has(e)) {
+			throw('deactivate / entity ${e.id} is not found');
+		}
 
 		_active_mask.disable(e.id);
 
@@ -138,8 +145,6 @@ class EntityManager {
 		/** destroy EntityManager */
 	@:noCompletion public function destroy_manager() {
 
-		_debug('destroy EntityManager');
-		
 		clear();
 
 		_entities = null;
@@ -151,8 +156,6 @@ class EntityManager {
 
 		/** remove and destroy all _entities */
 	public function clear() {
-
-		_debug('destroy all entities');
 
 		for (e in _entities) {
 			destroy(e);
@@ -174,7 +177,7 @@ class EntityManager {
 	function pop_entity_id():Int {
 
 		if(used >= capacity) {
-			throw 'Out of entities, max allowed ${capacity}';
+			throw('Out of entities, max allowed ${capacity}');
 		}
 
 		++used;
