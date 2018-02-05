@@ -2,9 +2,12 @@ package clay.containers;
 
 
 import clay.Entity;
-import clay.ds.BitVector;
-import haxe.ds.Vector;
 
+#if js
+private typedef IntArray = js.html.Int32Array;
+#else
+private typedef IntArray = haxe.ds.Vector<Int>;
+#end
 
 @:final @:unreflective @:dce
 class EntityVector {
@@ -12,16 +15,16 @@ class EntityVector {
 
 	public var length(default, null):Int;
 
-	public var indexes(default, null):Vector<Int>;
-	var buffer(default, null):Vector<Int>;
+	public var indexes(default, null):IntArray;
+	var buffer(default, null):IntArray;
 
 
 	public inline function new(_capacity:Int) {
 
 		length = 0;
 		
-		indexes = new Vector(_capacity);
-		buffer = new Vector(_capacity);
+		indexes = new IntArray(_capacity);
+		buffer = new IntArray(_capacity);
 
 		for (i in 0..._capacity) {
 			indexes[i] = -1;
@@ -140,7 +143,7 @@ class EntityVectorIterator {
 
 	public var index:Int;
 	public var end:Int;
-	public var data:Vector<Int>;
+	public var data:IntArray;
 
 
 	public inline function new(_vector:EntityVector) {

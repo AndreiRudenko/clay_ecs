@@ -2,9 +2,9 @@
 	"name": "clay",
 	"url": "https://github.com/RudenkoArts/clay",
 	"license": "MIT",
-	"tags": ["entity","component","system","ecs","cross","clay"],
-	"description": "ecs",
-	"version": "0.0.3",
+	"tags": ["entity","component","system","ecs","game","cross","clay"],
+	"description": "Entity-Component-System",
+	"version": "0.0.4",
 	"releasenote": "",
 	"contributors": ["RudenkoArts"]
 }

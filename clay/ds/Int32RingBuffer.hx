@@ -1,15 +1,13 @@
 package clay.ds;
 
 
-import haxe.ds.Vector;
-
-/** https://github.com/zeliard/Dispatcher/blob/master/JobDispatcher/ObjectPool.h **/
-
+// https://github.com/eliasku/ecx/blob/develop/src/ecx/ds/CInt32RingBuffer.hx
+// https://github.com/zeliard/Dispatcher/blob/master/JobDispatcher/ObjectPool.h
 
 #if js
 private typedef IntArray = js.html.Int32Array;
 #else
-private typedef IntArray = Vector<Int>;
+private typedef IntArray = haxe.ds.Vector<Int>;
 #end
 
 

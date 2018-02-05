@@ -1,10 +1,16 @@
 package clay.ds;
 
 
-import haxe.ds.Vector;
+// https://github.com/eliasku/ecx/blob/develop/src/ecx/ds/CInt32RingBuffer.hx
 
 
-abstract BitVector(Vector<Int>) from Vector<Int> {
+#if js
+private typedef IntArray = js.html.Int32Array;
+#else
+private typedef IntArray = haxe.ds.Vector<Int>;
+#end
+
+abstract BitVector(IntArray) from IntArray {
 	
 
 	public inline static var BITS_PER_ELEMENT:Int = 32;
@@ -14,7 +20,7 @@ abstract BitVector(Vector<Int>) from Vector<Int> {
 
 	public inline function new(count:Int) {
 	
-		this = new Vector(Math.ceil(count / BITS_PER_ELEMENT));
+		this = new IntArray(Math.ceil(count / BITS_PER_ELEMENT));
 	
 		#if neko
 		for(i in 0...this.length) {

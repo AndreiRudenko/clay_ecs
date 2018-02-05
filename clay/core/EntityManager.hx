@@ -44,7 +44,6 @@ class EntityManager {
 
 	}
 
-	@:access(clay.containers.EntityVector)
 	public function create(_active:Bool = true) : Entity {
 
 		var id:Int = pop_entity_id();
@@ -56,7 +55,7 @@ class EntityManager {
 			_active_mask.enable(id);
 		}
 
-		_entities._add(id);
+		_entities.add_unsafe(e);
 
 		if(oncreate != null) {
 			oncreate(e);
@@ -66,7 +65,6 @@ class EntityManager {
 
 	}
 
-	@:access(clay.containers.EntityVector)
 	public function destroy(e:Entity) {
 
 		var id:Int = e.id;
@@ -78,7 +76,7 @@ class EntityManager {
 		_alive_mask.disable(id);
 		_active_mask.disable(id);
 
-		_entities._remove(id);
+		_entities.remove_unsafe(e);
 		push_entity_id(id);
 
 		if(ondestroy != null) { // is there right place?
