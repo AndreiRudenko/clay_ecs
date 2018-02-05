@@ -39,18 +39,18 @@ class Components<T> {
 
 	}
 
-	public inline function get(e:Entity):T {
-
-		return components[e.id];
-
-	}
-
-	public inline function copy(from:Entity, to:Entity) {
+	public function copy(from:Entity, to:Entity) {
 
 		var c = components[from.id];
 		components[to.id] = c;
 		manager.flags[to.id].set_true(type.id + 1);
 		manager.entity_changed(to);
+
+	}
+
+	public inline function get(e:Entity):T {
+
+		return components[e.id];
 
 	}
 

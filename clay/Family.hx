@@ -77,18 +77,6 @@ class Family {
 
 	}
 
-	public function check(e:Entity) {
-
-		if(!_has(e)) {
-			if(_match_entity(e)) {
-				_add(e);
-			}
-		} else if(!_match_entity(e)) {
-			_remove(e);
-		}
-		
-	}
-
 	public function has(e:Entity):Bool {
 		
 		return _has(e);
@@ -125,6 +113,18 @@ class Family {
 
 	}
 
+	function check(e:Entity) {
+
+		if(!_has(e)) {
+			if(_match_entity(e)) {
+				_add(e);
+			}
+		} else if(!_match_entity(e)) {
+			_remove(e);
+		}
+		
+	}
+	
 	inline function get_length():Int {
 
 		return _entities.length;

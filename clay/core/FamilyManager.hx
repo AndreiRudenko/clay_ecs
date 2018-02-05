@@ -17,67 +17,65 @@ class FamilyManager {
 
 
 	var components:ComponentManager;
-	var families:Map<String, Family>; // array?
+	var families:Array<Family>;
 
 
 	public function new(_components:ComponentManager) {
 		
 		components = _components;
-		components._entity_changed = check;
+		components._entity_changed = check_entity;
 
-		families = new Map();
+		families = [];
 
 	}
 
+		/** create family */
 	public function create(_name:String, ?_include:Array<Class<Dynamic>>, ?_exclude:Array<Class<Dynamic>>){
 
 		var _family = new Family(this, _name, _include, _exclude);
-
 		handle_duplicate_warning(_family.name);
-
-		families.set(_family.name, _family);
+		families.push(_family);
 
 	}
 
+		/** remove family */
 	public function remove(_family:Family) {
 
-		families.remove(_family.name);
+		families.remove(_family);
 		
 	}
 
-	public inline function get(_name:String):Family {
-
-		return families.get(_name);
-		
-	}
-
-		/** remove all families */
-	public function clear() {
+		/** get family */
+	public function get(_name:String):Family {
 
 		for (f in families) {
-			families.remove(f.name);
+			if(f.name == _name) {
+				return f;
+			}
 		}
 
+		return null;
+		
 	}
-
-	@:noCompletion public function destroy_manager() {
-
-		components = null;
-		families = null;
-
-	}
-
-	inline function check(e:Entity) {
+		/** check entity if it match families */
+	public function check_entity(e:Entity) {
 		
 		for (f in families) {
 			f.check(e);
 		}
 
 	}
-	
+
+		/** remove all families */
+	public function clear() {
+
+		families.splice(0, families.length);
+
+	}
+
 	inline function handle_duplicate_warning(_name:String) {
 
-		var _f:Family = families.get(_name);
+		var _f:Family = get(_name);
 		if(_f != null) {
 			trace('adding a second family named: "${_name}"! This will replace the existing one, possibly leaving the previous one in limbo.');
 			remove(_f);
@@ -98,7 +96,7 @@ class FamilyManager {
 	}
 
 	@:noCompletion public inline function iterator():Iterator<Family> {
-			// array iteration is faster
+
 		return families.iterator();
 
 	}
