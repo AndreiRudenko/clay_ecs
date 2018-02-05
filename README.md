@@ -117,6 +117,3 @@ class Main {
 
 
 ```
-
-##### License
-MIT
